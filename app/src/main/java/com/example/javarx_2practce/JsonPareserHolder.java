@@ -1,6 +1,8 @@
 package com.example.javarx_2practce;
 
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.example.javarx_2practce.eneties.Comments;
 
@@ -15,39 +17,63 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+
 public class JsonPareserHolder {
 
     private String urlPath;
+    private int id= 0;
+    private String comment;
 
     public JsonPareserHolder(String urlPath)  {
         this.urlPath = urlPath;
     }
 
-    public Comments getUser(JSONObject jsonObject) throws JSONException {
-        JSONObject userRoot =jsonObject;
+//    public Comments getUser(JSONObject jsonObject) throws JSONException {
+//        JSONObject userRoot =jsonObject;
+//
+//        int userId = userRoot.getInt("id");
+//        String userComent = userRoot.getString("body");
+//
+//        return new Comments(userComent, userId);
+//    }
 
-        int userId = userRoot.getInt("id");
-        String userComent = userRoot.getString("body");
+    public Single<ArrayList<Comments>> getUserComments(final Button button)throws IOException, JSONException {//Здесь данные получаешь и отправляешь из в observer, a eto observable
+        return Single.create(new SingleOnSubscribe<ArrayList<Comments>>() {
+            @Override
+            public void subscribe(SingleEmitter<ArrayList<Comments>> emitter) throws Exception {
+                String userJsonStrike = getJsonFromServer(urlPath,10000);
+                final JSONArray array = new JSONArray(userJsonStrike);
+                final ArrayList<Comments> userArrayList = new ArrayList<>();
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        JSONObject curobj;
 
-        return new Comments(userComent, userId);
-    }
+                        for (int i = 0; i < array.length(); i++) {
 
-    public SingleArrayList<Comments> getUserComments()throws IOException, JSONException{//Здесь данные получаешь и отправляешь из в observer, a eto observable
+                            try {
+                                curobj = array.getJSONObject(i);
+                                id = curobj.getInt("id");
+                                comment = curobj.getString("body");
+                                Comments comments = new Comments(comment, id);
+                                userArrayList.add(comments);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
 
-        String userJsonStroke = getJsonFromServer(urlPath, 100000);
+                        }
 
-        JSONArray array = new JSONArray(userJsonStroke);
+                    }
 
-        ArrayList<Comments> userArrayList = new ArrayList<>();
+                });
+                emitter.onSuccess(userArrayList);
+            }
 
-        for(int i = 0; i<array.length(); i++){
-            JSONObject curobj = array.getJSONObject(i);
-            Log.d(Comments.class.getName(),curobj.toString());
-            Comments newUser = getUser(curobj);
-            userArrayList.add(newUser);
-        }
-        Log.d("CheckJson", String.valueOf(userArrayList.get(1)));
-        return  userArrayList;
+        });
+
     }
 
 

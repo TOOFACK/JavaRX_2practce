@@ -50,15 +50,9 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
 
 
 
-    public static class CommentsVH extends RecyclerView.ViewHolder implements Serializable {
+    public static class CommentsVH extends RecyclerView.ViewHolder  {
 
         private static TextView CommentV;
-
-        public CommentsVH(@NonNull View itemView,  TextView commentV){
-            super(itemView);
-
-            this.CommentV = CommentV;
-        }
 
         public CommentsVH(@NonNull View itemView) {
 
